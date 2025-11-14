@@ -1,26 +1,67 @@
-import { Link } from "react-router";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import useForm from '../../hooks/useForm';
 
-export const LoginPage = () => {
+export const LoginPage = ({ onLoginSuccess }) => {
   // TODO: Integrar lógica de autenticación aquí
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
   // TODO: Implementar useForm para el manejo del formulario
+  const { values, handleChange } = useForm({
+    username: '',
+    password: '',
+  });
+
   // TODO: Implementar función handleSubmit
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError(null);
+    if (!values.username || !values.password) {
+      setError('El usuario y la contraseña son obligatorios.');
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const response = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        onLoginSuccess();
+        navigate('/home');
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Credenciales incorrectas. Intenta nuevamente.');
+      }
+    } catch (err) {
+      console.error('Error de conexión:', err);
+      setError('No se pudo conectar con el servidor. Intenta más tarde.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 py-8">
       <div className="max-w-md w-full bg-white rounded-lg shadow-xl p-8">
-        {/* Título */}
         <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">
           Iniciar Sesión
         </h2>
+        {error && (
+          <div className="bg-red-100 text-red-700 p-3 rounded mb-4">
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
 
-        {/* TODO: Mostrar este div cuando haya error */}
-        <div className="hidden bg-red-100 text-red-700 p-3 rounded mb-4">
-          <p className="text-sm">
-            Credenciales incorrectas. Intenta nuevamente.
-          </p>
-        </div>
-
-        <form onSubmit={(event) => {}}>
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
               htmlFor="username"
@@ -32,6 +73,8 @@ export const LoginPage = () => {
               type="text"
               id="username"
               name="username"
+              value={values.username}
+              onChange={handleChange}
               placeholder="Ingresa tu usuario"
               className="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -49,6 +92,8 @@ export const LoginPage = () => {
               type="password"
               id="password"
               name="password"
+              value={values.password}
+              onChange={handleChange}
               placeholder="Ingresa tu contraseña"
               className="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
@@ -57,18 +102,21 @@ export const LoginPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors"
+            disabled={loading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
           >
-            Ingresar
+            {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-4">
           ¿No tienes cuenta?
+          {/* Corregido el import de Link */}
           <Link
             to="/register"
             className="text-blue-600 hover:text-blue-800 font-medium"
           >
+            {' '}
             Regístrate aquí
           </Link>
         </p>
