@@ -1,50 +1,49 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-export const Navbar = ({ onLogout }) => {
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+export const Navbar = () => {
   const [userName, setUserName] = useState("Usuario");
-  const navigate = useNavigate();
 
+  // TODO: Obtener datos del usuario desde /api/profile
+  // TODO: Manejar errores apropiadamente
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/profile', {
-          credentials: 'include',
+        const response = await fetch("http://localhost:3000/api/profile", {
+          credentials: "include",
         });
-
         if (response.ok) {
           const data = await response.json();
-          setUserName(data.user.name); 
+          setUserName(data.user.name);
         } else {
-          console.error("No se pudo obtener el perfil del usuario.");
-          onLogout();
+          window.location.reload();
         }
       } catch (error) {
         console.error("Error de red al obtener el perfil:", error);
-        onLogout();
+        window.location.reload();
       }
     };
-
     fetchProfile();
   }, []);
 
+  // TODO: Implementar función handleLogout con POST a /api/logout usando credentials: 'include'
+  // TODO: Después del logout exitoso, redireccionar a /login
+  // TODO: Manejar errores apropiadamente
   const handleLogout = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/logout', {
-        method: 'POST',
-        credentials: 'include',
+      const response = await fetch("http://localhost:3000/api/logout", {
+        method: "POST",
+        credentials: "include",
       });
 
       if (response.ok) {
-        onLogout();
-        navigate('/login');
+        window.location.reload();
       } else {
         const errorData = await response.json();
-        alert(`Error al cerrar sesión: ${errorData.message || 'Error desconocido'}`);
+        alert(`Error al cerrar sesión: ${errorData.message || "Error desconocido"}`);
       }
     } catch (error) {
-      console.error('Error de red durante el logout:', error);
-      alert('Error de conexión. No se pudo cerrar la sesión.');
+      console.error("Error de red durante el logout:", error);
+      alert("Error de conexión. No se pudo cerrar la sesión.");
     }
   };
 
@@ -60,7 +59,10 @@ export const Navbar = ({ onLogout }) => {
           </span>
 
           <button
-            onClick={handleLogout}
+            onClick={() => {
+              // TODO: Implementar handleLogout aquí
+              handleLogout();
+            }}
             className="bg-red-600 hover:bg-red-700 px-4 py-2 rounded transition-colors font-medium"
           >
             Cerrar Sesión

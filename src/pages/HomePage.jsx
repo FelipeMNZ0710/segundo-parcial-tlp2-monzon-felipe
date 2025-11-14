@@ -1,65 +1,58 @@
-import { useState, useEffect } from 'react';
-import Loading from '../components/Loading';
+import { useState, useEffect } from "react";
+import { Loading } from "../components/Loading";
 
 export const HomePage = () => {
-  // TODO: Integrar lógica para obtener superhéroes desde la API
-  const [userName, setUserName] = useState('');
   // TODO: Implementar useState para almacenar la lista de superhéroes
-  const [superheroes, setSuperheroes] = useState([]); 
+  const [superheroes, setSuperheroes] = useState([]);
+  const [userName, setUserName] = useState("");
   const [loading, setLoading] = useState(true);
   const [reloading, setReloading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchInitialData = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      const [profileRes, superheroesRes] = await Promise.all([
-        fetch('http://localhost:3000/api/profile', { credentials: 'include' }),
-        fetch('http://localhost:3000/api/superheroes', { credentials: 'include' })
-      ]);
-
-      if (profileRes.ok) {
-        const profileData = await profileRes.json();
-        setUserName(profileData.user.name);
-      } else {
-        throw new Error('No se pudo obtener la información del usuario.');
-      }
-
-      if (superheroesRes.ok) {
-        const superheroesData = await superheroesRes.json();
-        setSuperheroes(superheroesData.data);
-      } else {
-        throw new Error('No se pudo cargar la galería de superhéroes.');
-      }
-    } catch (err) {
-      console.error("Error al cargar los datos iniciales:", err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // TODO: Integrar lógica para obtener superhéroes desde la API
   useEffect(() => {
+    const fetchInitialData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const profileResponse = await fetch("http://localhost:3000/api/profile", {
+          credentials: "include",
+        });
+        if (!profileResponse.ok) {
+          throw new Error("Error al obtener los datos del usuario.");
+        }
+        const profileData = await profileResponse.json();
+        setUserName(profileData.user.name);
+        const heroesResponse = await fetch("http://localhost:3000/api/superheroes", {
+          credentials: "include",
+        });
+        if (!heroesResponse.ok) {
+          throw new Error("Error al cargar la galería de superhéroes.");
+        }
+        const heroesData = await heroesResponse.json();
+        setSuperheroes(heroesData.data);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchInitialData();
   }, []);
-
-  //TODO: Implementar función para recargar superhéroes
   const handleReload = async () => {
-    setError(null);
     setReloading(true);
+    setError(null);
     try {
-      const response = await fetch('http://localhost:3000/api/superheroes', {
-        credentials: 'include',
+      const response = await fetch("http://localhost:3000/api/superheroes", {
+        credentials: "include",
       });
-      if (response.ok) {
-        const data = await response.json();
-        setSuperheroes(data.data);
-      } else {
-        throw new Error('No se pudo recargar la galería.');
+      if (!response.ok) {
+        throw new Error("No se pudo recargar la galería.");
       }
+      const data = await response.json();
+      setSuperheroes(data.data);
     } catch (err) {
-      console.error("Error al recargar superhéroes:", err);
       setError(err.message);
     } finally {
       setReloading(false);
@@ -67,7 +60,7 @@ export const HomePage = () => {
   };
 
   if (loading) {
-    return <Loading/>;
+    return <Loading />;
   }
 
   return (
@@ -80,22 +73,24 @@ export const HomePage = () => {
         <button
           onClick={handleReload}
           disabled={reloading}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed"
+          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded transition-colors disabled:bg-blue-400"
         >
-          {reloading ? 'Recargando...' : 'Recargar'}
+          {reloading ? "Recargando..." : "Recargar"}
         </button>
       </div>
+
       {error && (
-        <div className="text-center bg-red-100 text-red-700 p-4 rounded-md">
-          <p>{error}</p>
+        <div className="text-center text-red-600 p-4">
+          <p>Error: {error}</p>
         </div>
       )}
 
       {!error && superheroes.length === 0 && (
-         <div className="text-center text-gray-500 p-4">
+        <div className="text-center text-gray-500 p-4">
           <p>No se encontraron superhéroes para mostrar.</p>
         </div>
       )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {superheroes.map((hero) => (
           <div

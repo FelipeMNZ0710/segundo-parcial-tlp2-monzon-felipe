@@ -1,52 +1,50 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import useForm from '../../hooks/useForm';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useForm } from "../hooks/useForm";
 
-export const RegisterPage = ({ onLoginSuccess }) => {
+export const RegisterPage = () => {
   // TODO: Integrar lógica de registro aquí
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   // TODO: Implementar useForm para el manejo del formulario
-  const { values, handleChange } = useForm({
-    username: '',
-    email: '',
-    password: '',
-    name: '',
-    lastname: '',
-  });
+  const { formState, username, email, password, name, lastname, handleChange } =
+    useForm({
+      username: "",
+      email: "",
+      password: "",
+      name: "",
+      lastname: "",
+    });
 
   // TODO: Implementar función handleSubmit
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError(null);
-    const { username, email, password, name, lastname } = values;
+
     if (!username || !email || !password || !name || !lastname) {
-      setError('Todos los campos son obligatorios.');
+      setError("Todos los campos son obligatorios.");
       return;
     }
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(values),
+      const response = await fetch("http://localhost:3000/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(formState),
       });
 
       if (response.ok) {
-        onLoginSuccess();
-        navigate('/home');
+        window.location.reload();
       } else {
         const errorData = await response.json();
-        setError(errorData.message || 'Error al crear la cuenta. Intenta nuevamente.');
+        setError(
+          errorData.message || "Error al crear la cuenta. Intenta nuevamente."
+        );
       }
     } catch (err) {
-      console.error('Error de conexión en el registro:', err);
-      setError('No se pudo conectar con el servidor. Intenta más tarde.');
+      setError("No se pudo conectar con el servidor.");
     } finally {
       setLoading(false);
     }
@@ -78,7 +76,7 @@ export const RegisterPage = ({ onLoginSuccess }) => {
               type="text"
               id="username"
               name="username"
-              value={values.username}
+              value={username}
               onChange={handleChange}
               placeholder="Elige un nombre de usuario"
               className="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -97,7 +95,7 @@ export const RegisterPage = ({ onLoginSuccess }) => {
               type="email"
               id="email"
               name="email"
-              value={values.email}
+              value={email}
               onChange={handleChange}
               placeholder="tu@email.com"
               className="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -116,7 +114,7 @@ export const RegisterPage = ({ onLoginSuccess }) => {
               type="password"
               id="password"
               name="password"
-              value={values.password}
+              value={password}
               onChange={handleChange}
               placeholder="Crea una contraseña segura"
               className="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -135,7 +133,7 @@ export const RegisterPage = ({ onLoginSuccess }) => {
               type="text"
               id="name"
               name="name"
-              value={values.name}
+              value={name}
               onChange={handleChange}
               placeholder="Tu nombre"
               className="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -154,7 +152,7 @@ export const RegisterPage = ({ onLoginSuccess }) => {
               type="text"
               id="lastname"
               name="lastname"
-              value={values.lastname}
+              value={lastname}
               onChange={handleChange}
               placeholder="Tu apellido"
               className="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -165,14 +163,14 @@ export const RegisterPage = ({ onLoginSuccess }) => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded transition-colors disabled:bg-green-400 disabled:cursor-not-allowed"
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded transition-colors disabled:bg-green-400"
           >
-            {loading ? 'Registrando...' : 'Registrarse'}
+            {loading ? "Registrando..." : "Registrarse"}
           </button>
         </form>
 
         <p className="text-center text-sm text-gray-600 mt-4">
-          ¿Ya tienes cuenta?{' '}
+          ¿Ya tienes cuenta?{" "}
           <Link
             to="/login"
             className="text-green-600 hover:text-green-800 font-medium"
